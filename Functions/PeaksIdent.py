@@ -21,14 +21,15 @@ def PeaksIdent(RawSignals,minInt=1e2,min_mz=0,max_mz=1000,minSignals=4,JustStats
         minMZ=np.min(PeakData[:,0])
         maxMZ=np.max(PeakData[:,0])
         PeakStats=PondMZStats(PeakData)
-        PeakStats.append(minMZ)
-        PeakStats.append(maxMZ)
-        PeakStats.append(PeakStats[0]-3*PeakStats[1])
-        PeakStats.append(PeakStats[0]+3*PeakStats[1])
-        if JustStats:
-            SpectrumPeaks.append(PeakStats)       
-        else:            
-            SpectrumPeaks.append([PeakStats,PeakData]) 
+        if type(PeakStats)!=type(0):
+            PeakStats.append(minMZ)
+            PeakStats.append(maxMZ)
+            PeakStats.append(PeakStats[0]-3*PeakStats[1])
+            PeakStats.append(PeakStats[0]+3*PeakStats[1])
+            if JustStats:
+                SpectrumPeaks.append(PeakStats)       
+            else:            
+                SpectrumPeaks.append([PeakStats,PeakData]) 
     if JustStats:
         SpectrumPeaks=np.array(SpectrumPeaks)
     return SpectrumPeaks
