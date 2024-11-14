@@ -3,8 +3,10 @@ import numpy as np
 # Add the Welch test to compare all the peaks
 # Add r2 calculation for Gaussian models
 # Consider deconvolution with Gaussian models
-def PeaksIdent(RawSignals,minInt=1e2,minSignals=4):
-    Filter=RawSignals[:,1]<minInt #Identify low intensity signals
+def PeaksIdent(RawSignals,minInt=1e2,min_mz=0,max_mz=1000,minSignals=4,JustStats=True):
+    Signals_filter=(RawSignals[:,0]<max_mz)&(RawSignals[:,0]>min_mz)
+    Signals=RawSignals[Signals_filter,:]
+    Filter=Signals[:,1]<minInt #Identify low intensity signals
     FilterLoc=np.where(Filter)[0] #Get the indices of evaluated mz with low intensity 
     # Evaluate the number of mz with a higher intensity between the ones with low intensity
     DifLoc=FilterLoc[1:]-FilterLoc[:-1] 
@@ -15,7 +17,18 @@ def PeaksIdent(RawSignals,minInt=1e2,minSignals=4):
     for filterLocID in DifLocLoc:
         min_mz_loc=FilterLoc[filterLocID]+1
         max_mz_loc=FilterLoc[filterLocID+1]
-        PeakStats=PondMZStats(RawSignals[min_mz_loc:max_mz_loc,:])
-        SpectrumPeaks.append(PeakStats)        
-    SpectrumPeaks=np.array(SpectrumPeaks)
+        PeakData=Signals[min_mz_loc:max_mz_loc,:]
+        minMZ=np.min(PeakData[:,0])
+        maxMZ=np.max(PeakData[:,0])
+        PeakStats=PondMZStats(PeakData)
+        PeakStats.append(minMZ)
+        PeakStats.append(maxMZ)
+        PeakStats.append(PeakStats[0]-3*PeakStats[1])
+        PeakStats.append(PeakStats[0]+3*PeakStats[1])
+        if JustStats:
+            SpectrumPeaks.append(PeakStats)       
+        else:            
+            SpectrumPeaks.append([PeakStats,PeakData]) 
+    if JustStats:
+        SpectrumPeaks=np.array(SpectrumPeaks)
     return SpectrumPeaks
