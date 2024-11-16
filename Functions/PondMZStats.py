@@ -1,12 +1,11 @@
 from scipy.stats import shapiro
-from scipy.stats import t
 from scipy import stats
 import numpy as np
 from WelchTest import *
 from DistributionVec import *
 from Derivate import *
 from SignalsDifStats import *
-def PondMZStats(PeakData0,alpha=0.01,Filter=False,RelInt=4,MinTresRelDer=0):
+def PondMZStats(PeakData0,alpha=0.01,Filter=False,RelInt=0.1,MinTresRelDer=0):
     PeakData0=np.array(PeakData0)
     dimen=np.shape(PeakData0)
     if dimen[0]<dimen[1]:
@@ -46,9 +45,12 @@ def PondMZStats(PeakData0,alpha=0.01,Filter=False,RelInt=4,MinTresRelDer=0):
     DifTres=stats_Dif[2] #the maximum difference inside the cluster
     ConfidenceIntervalDa=tref*Std/np.sqrt(l)
     ConfidenceInterval=tref*Std/np.sqrt(l)/AverageMZ*1e6
-    HistogramData=DistributionVec(data=PeakData,norm=len(PeakData))
-    ShapiroResults=shapiro(HistogramData)
+    ShapiroResults=0
     Sqrt2pi=2.5066282746310002 #np.sqrt(np.pi*2) 
     TotalInt=b*Sqrt2pi*Std #This equation is specially relevant, as no-one is talking about variability in the MZ data 
-    PeakStats=[AverageMZ,Std,l,ConfidenceIntervalDa,ConfidenceInterval,m,b,r2,SumIntens,ShapiroResults[1],DifTres]      
+    min_mz=np.min(PeakData[:,0])
+    max_mz=np.max(PeakData[:,0])
+    min_mz3std=AverageMZ-3*Std
+    max_mz3std=AverageMZ+3*Std    
+    PeakStats=[AverageMZ,Std,l,ConfidenceIntervalDa,ConfidenceInterval,m,b,r2,SumIntens,ShapiroResults,DifTres,MaxInt,min_mz,max_mz,min_mz3std,max_mz3std]      
     return PeakStats

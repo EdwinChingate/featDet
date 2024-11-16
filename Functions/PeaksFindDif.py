@@ -1,10 +1,12 @@
 import numpy as np
 from PeaksIdent import *
-def PeaksFindDif(RawSignals,ZeroInt=1e2,min_mz=0,max_mz=1000,plus_mz=2,minSignals=4,JustStats=True,PeaksSafetyFactor=2,DiffromPeaks=10):
+from PondMZStats import *
+def PeaksFindDif(RawSignals,ZeroInt=1e2,min_mz=0,max_mz=1000,minSignals=4,JustStats=True,PeaksSafetyFactor=2,DiffromPeaks=10,stdDistance=3, PeaksNumber=10):
     # It's using another algorithm to analize a fraction of the spectrum and get a reference value for the DifTres parameter
     min_mz=max([np.min(RawSignals[:,0]),min_mz])
-    min_mzplus=min_mz+plus_mz
-    Peaks=PeaksIdent(RawSignals,minInt=ZeroInt,min_mz=min_mz,max_mz=min_mzplus,minSignals=4,JustStats=True)
+    Peaks=PeaksIdent(RawSignals,minInt=ZeroInt,min_mz=min_mz,max_mz=max_mz,minSignals=4,JustStats=True, PeaksNumber=PeaksNumber)
+    if len(Peaks)==0:
+        return 0
     DifTres=np.max(Peaks[:,10])
     DiffromPeaksVec=np.ones(DiffromPeaks)*DifTres
     # Filter the signals and reducing the size of the dataset
@@ -26,17 +28,11 @@ def PeaksFindDif(RawSignals,ZeroInt=1e2,min_mz=0,max_mz=1000,plus_mz=2,minSignal
             break
         max_mz_loc=Right_loc[Loc_Right_loc[0]]+1
         PeakData=Signals[min_mz_loc:max_mz_loc,:]
-        minMZ=np.min(PeakData[:,0])
-        maxMZ=np.max(PeakData[:,0])
         PeakStats=PondMZStats(PeakData)             
         if type(PeakStats)!=type(0):
             DifPeakLoc=peaks_count%DiffromPeaks
             DiffromPeaksVec[DifPeakLoc]=PeakStats[10]
-            DifTres=np.mean(DiffromPeaksVec)
-            PeakStats.append(minMZ)
-            PeakStats.append(maxMZ)
-            PeakStats.append(PeakStats[0]-3*PeakStats[1])
-            PeakStats.append(PeakStats[0]+3*PeakStats[1])
+            DifTres=np.median(DiffromPeaksVec)
             peaks_count+=1
             if JustStats:
                 SpectrumPeaks.append(PeakStats)       

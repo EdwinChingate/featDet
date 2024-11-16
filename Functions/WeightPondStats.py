@@ -1,0 +1,39 @@
+import numpy as np
+from scipy.stats import t
+def WeightPondStats(PeakStats1,PeakStats2,alpha=0.01):
+    SumInt1=PeakStats1[8]
+    SumInt2=PeakStats2[8]
+    SumInt=SumInt1+SumInt2    
+    mz1=PeakStats1[0]
+    mz2=PeakStats2[0]
+    mz=(mz1*SumInt1+mz2*SumInt2)/SumInt
+    std2_mz1=PeakStats1[1]**2
+    std2_mz2=PeakStats2[1]**2
+    std2_mz=(std2_mz1*SumInt1+std2_mz2*SumInt2)/SumInt
+    std_mz=np.sqrt(std2_mz)
+    DataPoints1=PeakStats1[2]
+    DataPoints2=PeakStats2[2]
+    DataPoints=DataPoints1+DataPoints2
+    tref=t.interval(1-alpha, DataPoints-1)[1]
+    ConfidenceInterval_Da=tref*std_mz/np.sqrt(DataPoints)
+    ConfidenceInterval_ppm=ConfidenceInterval_Da/mz*1e6
+    m=0
+    b=0
+    r2=0
+    Shapiro=0
+    DifTres1=PeakStats1[10]
+    DifTres2=PeakStats2[10]
+    DifTres=np.max([DifTres1,DifTres2])
+    MaxInt1=PeakStats1[11]
+    MaxInt2=PeakStats2[11]
+    MaxInt=np.max([MaxInt1,MaxInt2])
+    min_mz1=PeakStats1[12]
+    min_mz2=PeakStats2[12]
+    min_mz=np.min([min_mz1,min_mz2])
+    max_mz1=PeakStats1[13]
+    max_mz2=PeakStats2[13]
+    max_mz=np.max([max_mz1,max_mz2])
+    min_mz3std=mz-3*std_mz
+    max_mz3std=mz+3*std_mz
+    PeakStats=[mz,std_mz,DataPoints,ConfidenceInterval_Da,ConfidenceInterval_ppm,m,b,r2,SumInt,Shapiro,DifTres,MaxInt,min_mz,max_mz,min_mz3std,max_mz3std]
+    return PeakStats
