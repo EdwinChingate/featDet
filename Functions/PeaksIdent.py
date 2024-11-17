@@ -3,7 +3,7 @@ import numpy as np
 # Add the Welch test to compare all the peaks
 # Add r2 calculation for Gaussian models
 # Consider deconvolution with Gaussian models
-def PeaksIdent(RawSignals,minInt=1e2,min_mz=0,max_mz=1000,minSignals=4,JustStats=True,stdDistance=3, PeaksNumber=0):
+def PeaksIdent(RawSignals,minInt=1e2,min_mz=0,max_mz=1000,JustStats=True,PeaksNumber=0,minSignals=30):
     Signals_filter=(RawSignals[:,0]<max_mz)&(RawSignals[:,0]>min_mz)
     Signals=RawSignals[Signals_filter,:]
     Filter=Signals[:,1]<minInt #Identify low intensity signals
@@ -20,9 +20,7 @@ def PeaksIdent(RawSignals,minInt=1e2,min_mz=0,max_mz=1000,minSignals=4,JustStats
         min_mz_loc=FilterLoc[filterLocID]+1
         max_mz_loc=FilterLoc[filterLocID+1]
         PeakData=Signals[min_mz_loc:max_mz_loc,:]
-        minMZ=np.min(PeakData[:,0])
-        maxMZ=np.max(PeakData[:,0])
-        PeakStats=PondMZStats(PeakData)
+        PeakStats=PondMZStats(PeakData,minSignals=minSignals)
         if type(PeakStats)!=type(0):
             if JustStats:
                 SpectrumPeaks.append(PeakStats)       

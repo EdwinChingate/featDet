@@ -5,8 +5,12 @@ from WelchTest import *
 from DistributionVec import *
 from Derivate import *
 from SignalsDifStats import *
-def PondMZStats(PeakData0,alpha=0.01,Filter=False,RelInt=0.1,MinTresRelDer=0):
+
+def PondMZStats(PeakData0,alpha=0.01,Filter=True,RelInt=0.1,MinTresRelDer=0,minSignals=30,Expected_std_mz=1.2e-3,stdDistance=4):
     PeakData0=np.array(PeakData0)
+    l=len(PeakData0[:,1]) 
+    if l<minSignals:
+        return 0    
     dimen=np.shape(PeakData0)
     if dimen[0]<dimen[1]:
         PeakData0=PeakData0.copy().T
@@ -14,11 +18,10 @@ def PondMZStats(PeakData0,alpha=0.01,Filter=False,RelInt=0.1,MinTresRelDer=0):
         PeakData0=PeakData0.copy()        
     MaxInt=np.max(PeakData0[:,1])
     if Filter:
-        PeakStats0=PondMZStats(PeakData0,Filter=False)
         MaxIntLoc=np.where(PeakData0[:,1]==MaxInt)[0]
-        mzMaxInt=np.mean(PeakData0[MaxIntLoc,0])
-        maxMZ=mzMaxInt+5*PeakStats0[1]
-        minMZ=mzMaxInt-5*PeakStats0[1]
+        mzMaxInt=np.mean(PeakData0[MaxIntLoc,0])             
+        maxMZ=mzMaxInt+stdDistance*Expected_std_mz
+        minMZ=mzMaxInt-stdDistance*Expected_std_mz
         PeakLoc=np.where((PeakData0[:,0]>=minMZ)&(PeakData0[:,0]<=maxMZ))[0]
         PeakData=PeakData0[PeakLoc,:].copy()
     else:
@@ -28,7 +31,7 @@ def PondMZStats(PeakData0,alpha=0.01,Filter=False,RelInt=0.1,MinTresRelDer=0):
     RelativeInt=PeakData[:,1]/SumIntens
     AverageMZ=sum(PeakData[:,0]*RelativeInt)
     l=len(PeakData[:,1])    
-    if l<3:
+    if l<minSignals:
         return 0
     Varian=sum(RelativeInt*(PeakData[:,0]-AverageMZ)**2)*l/(l-1)
     tref=stats.t.interval(1-alpha, l-1)[1]
