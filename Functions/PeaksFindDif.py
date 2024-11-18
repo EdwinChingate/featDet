@@ -31,7 +31,7 @@ def PeaksFindDif(RawSignals,ZeroInt=1e4,min_mz=0,max_mz=1000,JustStats=True,Peak
         max_mz_loc=Right_loc[Loc_Right_loc[0]]+1
         PeakData=Signals[min_mz_loc:max_mz_loc,:]
         PeakStats=PondMZStats(PeakData,minSignals=minSignals,Expected_std_mz=Expected_std_mz,stdDistance=stdDistance)             
-        if type(PeakStats)!=type(0):
+        if type(PeakStats)!=type(0):            
             DifPeakLoc=peaks_count%DiffromPeaks
             DiffromPeaksVec[DifPeakLoc]=PeakStats[10]
             Expected_std_mzVec[DifPeakLoc]=PeakStats[1]
@@ -41,11 +41,11 @@ def PeaksFindDif(RawSignals,ZeroInt=1e4,min_mz=0,max_mz=1000,JustStats=True,Peak
                 SpectrumPeaks.append(PeakStats)       
             else:            
                 SpectrumPeaks.append([PeakStats,PeakData]) 
-        min_mz_loc=max_mz_loc  
+        min_mz_loc=max_mz_loc      
     if len(SpectrumPeaks)==0:
         return 0
     if JustStats:
         SpectrumPeaks=np.array(SpectrumPeaks) 
-        QualityLoc=SpectrumPeaks[:,4]>minQuality
+        QualityLoc=SpectrumPeaks[:,4]<minQuality
         SpectrumPeaks=SpectrumPeaks[QualityLoc,:]
     return SpectrumPeaks
